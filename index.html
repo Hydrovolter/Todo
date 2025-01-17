@@ -1,0 +1,159 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Todos</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #1e1e2e;
+        color: #cdd6f4;
+        font-family: 'Inter', sans-serif;
+      }
+
+      .container {
+        background-color: #313244;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn {
+        background-color: #89b4fa;
+        color: #1e1e2e;
+        transition: all 0.3s;
+      }
+
+      .btn:hover {
+        background-color: #7398d1;
+        transform: scale(1.05);
+      }
+
+      .input {
+        background-color: #45475a;
+        border: none;
+        color: #cdd6f4;
+      }
+
+      .input:focus {
+        outline: 2px solid #89b4fa;
+      }
+
+      .todo-item {
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+      }
+
+      .todo-item:hover {
+        background-color: #585b70;
+        border-radius: 8px;
+        padding: 0.5rem;
+      }
+
+      .checkbox {
+        accent-color: #89b4fa;
+        width: 18px;
+        height: 18px;
+      }
+
+      .line-through {
+        text-decoration: line-through;
+        color: #a6adc8;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="flex items-center justify-center min-h-screen">
+      <div class="container">
+        <h1 class="text-2xl font-bold mb-6">Todos</h1>
+        <div class="flex mb-4">
+          <input
+            class="input flex-1 py-2 px-4 rounded-md"
+            type="text"
+            name="name"
+            placeholder="Add a new task"
+          />
+          <button
+            class="btn ml-4 py-2 px-6 rounded-md font-semibold"
+            id="create"
+          >
+            Add
+          </button>
+        </div>
+        <div id="todos"></div>
+      </div>
+    </div>
+
+    <script>
+      window.todos = $TODOS;
+
+      var updateTodos = function () {
+        fetch('/', {
+          method: 'PUT',
+          body: JSON.stringify({ todos: window.todos })
+        });
+        populateTodos();
+      };
+
+      var completeTodo = function (evt) {
+        var checkbox = evt.target;
+        var todoElement = checkbox.parentNode;
+        var newTodoSet = [].concat(window.todos);
+        var todo = newTodoSet.find(t => t.id == todoElement.dataset.todo);
+        todo.completed = !todo.completed;
+        window.todos = newTodoSet;
+        updateTodos();
+      };
+
+      var populateTodos = function () {
+        var todoContainer = document.querySelector('#todos');
+        todoContainer.innerHTML = null;
+
+        window.todos.forEach(todo => {
+          var el = document.createElement('div');
+          el.className = 'todo-item';
+          el.dataset.todo = todo.id;
+
+          var name = document.createElement('span');
+          name.className = todo.completed ? 'line-through' : '';
+          name.textContent = todo.name;
+
+          var checkbox = document.createElement('input');
+          checkbox.className = 'checkbox';
+          checkbox.type = 'checkbox';
+          checkbox.checked = todo.completed ? 1 : 0;
+          checkbox.addEventListener('click', completeTodo);
+
+          el.appendChild(checkbox);
+          el.appendChild(name);
+          todoContainer.appendChild(el);
+        });
+      };
+
+      populateTodos();
+
+      var createTodo = function () {
+        var input = document.querySelector('input[name=name]');
+        if (input.value.length) {
+          window.todos = [].concat(todos, {
+            id: `${window.todos.length + 1}`,
+            name: input.value,
+            completed: false
+          });
+          input.value = '';
+          updateTodos();
+        }
+      };
+
+      document.querySelector('#create').addEventListener('click', createTodo);
+    </script>
+  </body>
+</html>
