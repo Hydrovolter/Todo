@@ -1,4 +1,4 @@
 # Todo List App
-A simple (local) todo list
+A simple (local) browser todo list
 
 Made with Cloudflare Workers
